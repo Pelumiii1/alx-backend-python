@@ -1,16 +1,17 @@
 import sqlite3
 import functools
+from datetime import datetime
 
 #### decorator to lof SQL queries
 
 def log_queries(func):
     """
-    A decorator that logs the SQL query before executing it.
+    A decorator that logs the SQL query with a timestamp before executing it.
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         query = kwargs.get('query') if 'query' in kwargs else args[0]
-        print(f"Executing query: {query}")
+        print(f"[{datetime.now()}] Executing query: {query}")
         return func(*args, **kwargs)
     return wrapper
 
