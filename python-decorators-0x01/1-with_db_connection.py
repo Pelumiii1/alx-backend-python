@@ -31,12 +31,10 @@ def with_db_connection(func):
     def wrapper(*args, **kwargs):
         conn = sqlite3.connect(DB_FILE)
         try:
-            # Pass the connection as the first argument
             result = func(conn, *args, **kwargs)
             return result
         finally:
             conn.close()
-            # print("Database connection closed.") # Optional: for verification
     return wrapper
 
 @with_db_connection
