@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import unittest
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized
+from parameterized import parameterized_class
 from unittest.mock import patch, PropertyMock,Mock
 from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
