@@ -5,7 +5,6 @@ from parameterized import parameterized
 from parameterized import parameterized_class
 from unittest.mock import patch, PropertyMock,Mock
 from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
-
 from client import GithubOrgClient
 
 class TestGithubOrgClient(unittest.TestCase):
