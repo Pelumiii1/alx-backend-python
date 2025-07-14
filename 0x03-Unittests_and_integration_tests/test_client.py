@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import unittest
-from parameterized import parameterized
-from unittest.mock import patch, PropertyMock
+from parameterized import parameterized, parameterized_class
+from unittest.mock import patch, PropertyMock,Mock
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 from client import GithubOrgClient
 
@@ -59,3 +60,33 @@ class TestGithubOrgClient(unittest.TestCase):
         """Test that has_license returns correct boolean based on license key"""
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+@parameterized_class([
+    {
+        "org_payload": org_payload,
+        "repos_payload": repos_payload,
+        "expected_repos": expected_repos,
+        "apache2_repos": apache2_repos,
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.get_patcher = patch('requests.get')
+        cls.mock_get = cls.get_patcher.start()
+
+        def side_effect(url):
+            mock_resp = Mock()
+            if url == GithubOrgClient.ORG_URL.format("testorg"):
+                mock_resp.json.return_value = cls.org_payload
+            elif url == cls.org_payload["repos_url"]:
+                mock_resp.json.return_value = cls.repos_payload
+            return mock_resp
+
+        cls.mock_get.side_effect = side_effect
+
+    @classmethod
+    def tearDownClass(cls):
+        """Stop patching requests.get"""
+        cls.get_patcher.stop()
