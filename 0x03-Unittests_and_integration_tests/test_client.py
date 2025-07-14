@@ -7,6 +7,7 @@ from unittest.mock import patch, PropertyMock,Mock
 from fixtures import TEST_PAYLOAD
 from client import GithubOrgClient
 from requests import HTTPError
+from typing import Dict
  
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -55,13 +56,13 @@ class TestGithubOrgClient(unittest.TestCase):
             mock_url.assert_called_once()
             
     @parameterized.expand([
-        ({"license": {"key": "my_license"}}, "my_license", True),
-        ({"license": {"key": "other_license"}}, "my_license", False),
+        ({'license': {'key': "bsd-3-clause"}}, "bsd-3-clause", True),
+        ({'license': {'key': "bsl-1.0"}}, "bsd-3-clause", False),
     ])
-    def test_has_license(self, repo, license_key, expected):
-        """Test that has_license returns correct boolean based on license key"""
-        result = GithubOrgClient.has_license(repo, license_key)
-        self.assertEqual(result, expected)
+    def test_has_license(self, repo: Dict, key: str, expected: bool) -> None:
+        gh_org_client = GithubOrgClient("google")
+        client_has_licence = gh_org_client.has_license(repo, key)
+        self.assertEqual(client_has_licence, expected)
 
 @parameterized_class([
     {
