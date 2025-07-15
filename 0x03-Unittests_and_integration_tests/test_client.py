@@ -36,11 +36,10 @@ class TestGithubOrgClient(unittest.TestCase):
         
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json):
-
+        """ unit-test GithubOrgClient.public_repos """
         mock_payload = [
             {"name": "repo1"},
             {"name": "repo2"},
-            {"name": "repo3"}
         ]
         mock_get_json.return_value = mock_payload
 
@@ -50,10 +49,29 @@ class TestGithubOrgClient(unittest.TestCase):
             client = GithubOrgClient("testorg")
             repos = client.public_repos()
 
-            self.assertEqual(repos, ["repo1", "repo2", "repo3"])
+            self.assertEqual(repos, ["repo1", "repo2"])
 
             mock_get_json.assert_called_once_with("https://api.github.com/orgs/testorg/repos")
             mock_url.assert_called_once()
+
+    @patch('client.get_json')
+    def test_public_repos_with_license(self, mock_get_json):
+        """Test public_repos with a license filter."""
+        repos_payload = TEST_PAYLOAD[0][1]
+        apache2_repos = TEST_PAYLOAD[0][3]
+        mock_get_json.return_value = repos_payload
+
+        with patch.object(GithubOrgClient,
+                         '_public_repos_url',
+                         new_callable=PropertyMock) as mock_public_repos_url:
+            mock_public_repos_url.return_value = "https://api.github.com/orgs/google/repos"
+            
+            client = GithubOrgClient("google")
+            result = client.public_repos(license="apache-2.0")
+            
+            self.assertEqual(result, apache2_repos)
+            mock_public_repos_url.assert_called_once()
+            mock_get_json.assert_called_once_with("https://api.github.com/orgs/google/repos")
             
     @parameterized.expand([
         ({'license': {'key': "bsd-3-clause"}}, "bsd-3-clause", True),
