@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework import viewsets,status
+from rest_framework import viewsets,status, filters
 from .models import User, Conversation, Message
 from .serializers import  ConversationSerializer,MessageSerializer
 
@@ -32,6 +32,11 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer(read_only=True)
+    
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['message_body']
+    ordering_fields = ['sent_at']
+    ordering = ['-sent_at']
     
     """
     ViewSet for listing and creating messages
