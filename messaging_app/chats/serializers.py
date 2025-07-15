@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from models import User, Message, Conversation
+from .models import User, Message, Conversation
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,3 +21,12 @@ class ConversationSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = ["conversation_id", 'participants', 'messages', 'created_at']
         read_only_fields = ['conversation_id', 'created_at']
+        
+    def get_messages(self,obj):
+        messages = obj.messages.all()
+        return MessageSerializer(messages, many=True).data
+    
+    def validate(self, data):
+        if not data.get("participants"):
+            raise serializers.ValidationError("Conversation must have at least one participant")
+        return data
