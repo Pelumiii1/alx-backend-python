@@ -20,7 +20,7 @@ class MessageSerializer(serializers.ModelSerializer):
         read_only_fields = ['messsage_id', 'sent_at']
         
 class ConversationSerializer(serializers.ModelSerializer):
-    messages = MessageSerializer(many=True, read_only=True)
+    messages = serializers.SerializerMethodField()
     participants = UserSerializer(many=True, read_only=True)
     
     class Meta:
