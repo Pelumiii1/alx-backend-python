@@ -23,7 +23,7 @@ class User(AbstractUser):
         return f"{self.first_name} {self.last_name}"
 
 class Conversation(models.Model):
-  participates = models.ManyToManyField(User, related_name="conversations")
+  participants = models.ManyToManyField(User, related_name="conversations")
   created_at = models.DateTimeField(auto_now_add=True)
   conversation_id = models.CharField(max_length=100, unique=True)
   
