@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import viewsets,status
 from .models import User, Conversation, Message
-from .serializers import UserSerializer, ConversationSerializer, MessageSerializer
+from .serializers import  ConversationSerializer,MessageSerializer
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """
@@ -30,6 +30,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer(read_only=True)
+    
     """
     ViewSet for listing and creating messages
     """
