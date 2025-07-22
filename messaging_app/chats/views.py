@@ -4,11 +4,11 @@ from rest_framework import viewsets,status, filters
 from .models import User, Conversation, Message
 from .serializers import  ConversationSerializer,MessageSerializer
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwner
+from .permissions import IsParticipantOfConversation
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
-    permission_classes= [IsAuthenticated, IsOwner]
+    permission_classes= [IsAuthenticated, IsParticipantOfConversation]
 
     def get_queryset(self):
         return Conversation.objects.filter(participants=self.request.user)
@@ -19,7 +19,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['message_body']
@@ -28,8 +28,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        return Message.objects.filter(conversation__participants=self.request.user)
+        conversation_pk = self.kwargs['conversation_pk']
+        return Message.objects.filter(conversation__pk=conversation_pk, conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(sender=self.request.user)
+        conversation_pk = self.kwargs['conversation_pk']
+        conversation = Conversation.objects.get(pk=conversation_pk)
+        serializer.save(sender=self.request.user, conversation=conversation)
 
