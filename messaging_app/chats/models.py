@@ -4,8 +4,8 @@ import uuid
 
 class User(AbstractUser):
     pass
-
 class Conversation(models.Model):
+  conversation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
   participants = models.ManyToManyField(User, related_name="conversations")
   created_at = models.DateTimeField(auto_now_add=True)
   
@@ -13,6 +13,7 @@ class Conversation(models.Model):
         return f"Conversation {self.id}"
 
 class Message(models.Model):
+    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
     message_body = models.TextField()
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")

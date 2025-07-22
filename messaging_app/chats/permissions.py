@@ -9,4 +9,4 @@ class IsParticipantOfConversation(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.participants.all()
+        return request.user in obj.conversation.participants.all()
