@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.generics import DestroyAPIView
 from .models import Message
 from django.db.models import Prefetch
@@ -8,12 +10,16 @@ from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 
-class DeleteUserView(DestroyAPIView):
-    queryset = User.objects.all()
+class DeleteUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        return self.request.user
+    def delete(self, request):
+        try:
+            user = request.user
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         
 
 def get_threaded_messages(message_id):
