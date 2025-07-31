@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from chats.auth import CookieTokenObtainPairView, CookieTokenRefreshView
-from messaging.views import DeleteUserView, ThreadedMessageView
+from messaging.views import DeleteUserView, ThreadedMessageView, UnreadMessagesView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('api/user/delete/', DeleteUserView.as_view(), name='delete_user'),
     path('api/messages/<int:pk>/', ThreadedMessageView.as_view(), name='threaded_message'),
+    path('api/messages/unread/', UnreadMessagesView.as_view(), name='unread_messages'),
 ]
