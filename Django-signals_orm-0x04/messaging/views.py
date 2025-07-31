@@ -1,11 +1,12 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import DestroyAPIView
+from rest_framework.generics import DestroyAPIView, RetrieveAPIView
 from .models import Message
 from django.db.models import Prefetch
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
+from .serializers import MessageSerializer
 
 # Create your views here.
 
@@ -13,20 +14,22 @@ from rest_framework.permissions import IsAuthenticated
 class DeleteUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete_user(self, request):
+    def delete(self, request):
         try:
             user = request.user
             user.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        
 
-def get_threaded_messages(message_id):
-    messages = Message.objects.prefetch_related(
-        Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver'))
-    ).select_related('sender', 'receiver').filter(parent_message__isnull=True)
+class ThreadedMessageView(RetrieveAPIView):
+    queryset = Message.objects.filter(parent_message__isnull=True)
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
 
-
-
-    return messages
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related(
+            Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver').prefetch_related(
+                Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver'))
+            ))
+        ).select_related('sender', 'receiver')
