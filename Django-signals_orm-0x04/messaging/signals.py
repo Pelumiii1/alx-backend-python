@@ -1,6 +1,7 @@
 from django.dispatch import receiver
-from django.db.models.signals import post_save,pre_save
+from django.db.models.signals import post_save,pre_save,post_delete
 from .models import Message,Notification,MessageHistory
+from django.contrib.auth.models import User
 from django.utils import timezone
 
 
@@ -22,3 +23,9 @@ def create_message_history(sender,instance,created,**kwargs):
                 MessageHistory.objects.create(message=instance,old_content=old_message.content)
         except Message.DoesNotExist:
             pass
+        
+@receiver(post_delete, sender=User)
+def delete_user_messages(sender,instance,**kwargs):
+    Message.objects.filter(sender=instance).delete()
+    Message.objects.filter(receiver=instance).delete()
+    Notification.objects.filter(user=instance).delete()
