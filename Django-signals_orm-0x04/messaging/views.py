@@ -7,6 +7,8 @@ from django.db.models import Prefetch, Q
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from .serializers import MessageSerializer
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # Create your views here.
 
@@ -25,6 +27,10 @@ class DeleteUserView(APIView):
 class ThreadedMessageView(RetrieveAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+
+    @method_decorator(cache_page(60))
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         user = self.request.user
