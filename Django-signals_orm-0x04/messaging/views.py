@@ -26,12 +26,13 @@ class ThreadedMessageView(RetrieveAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
+    def get_queryset(self,request):
         user = self.request.user
         return Message.objects.filter(
-            Q(parent_message__isnull=True) & (Q(sender=user) | Q(receiver=user))
+            sender=request.user
+        ).select_related(
+            'sender', 'receiver', 'conversation', 'parent_message'
         ).prefetch_related(
-            Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver').prefetch_related(
-                Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver'))
-            ))
-        ).select_related('sender', 'receiver')
+            'replies__sender', 'replies__receiver'
+        )
+        
