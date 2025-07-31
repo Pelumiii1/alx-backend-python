@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from chats.auth import CookieTokenObtainPairView, CookieTokenRefreshView
+from messaging.views import DeleteUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +25,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('api/token/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/user/delete/', DeleteUserView.as_view(), name='delete_user'),
 ]
