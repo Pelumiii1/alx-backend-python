@@ -41,5 +41,4 @@ class UnreadMessagesView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Message.objects.filter(receiver=self.request.user).exclude(read_receipts__user=self.request.user).only('sender', 'content', 'timestamp')
-        
+        return Message.unread.unread_for_user(self.request.user).only('sender', 'content', 'timestamp')
