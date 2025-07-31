@@ -11,6 +11,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import RegisterSerializer, UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
@@ -38,6 +40,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     ordering_fields = ['sent_at']
     ordering = ['-sent_at']
 
+    @method_decorator(cache_page(60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         conversation_pk = self.kwargs['conversation_pk']
