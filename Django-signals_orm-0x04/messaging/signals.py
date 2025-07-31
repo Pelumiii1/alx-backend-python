@@ -1,6 +1,7 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save,pre_save
 from .models import Message,Notification,MessageHistory
+from django.utils import timezone
 
 
 @receiver(post_save, sender=Message)
@@ -15,6 +16,9 @@ def create_message_history(sender,instance,created,**kwargs):
         try:
             old_message = Message.objects.get(id=instance.id)
             if old_message.content != instance.content:
+                instance.edited = True
+                instance.edited_at = timezone.now()
+                instance.edited_by = instance.sender
                 MessageHistory.objects.create(message=instance,old_content=old_message.content)
         except Message.DoesNotExist:
             pass
