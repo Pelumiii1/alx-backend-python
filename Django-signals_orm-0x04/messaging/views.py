@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 class DeleteUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request):
+    def delete_user(self, request):
         try:
             user = request.user
             user.delete()
