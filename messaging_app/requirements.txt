@@ -5,3 +5,4 @@ sqlparse
 djangorestframework-simplejwt
 django-filter
 drf-nested-routers
+mysqlclient
