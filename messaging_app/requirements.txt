@@ -1,2 +1,7 @@
-django
+Django
 djangorestframework
+jwt
+sqlparse
+djangorestframework-simplejwt
+django-filter
+drf-nested-routers
