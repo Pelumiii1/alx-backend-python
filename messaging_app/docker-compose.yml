@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: yourrootpassword
-      MYSQL_DATABASE: messaging_app
+      MYSQL_DB: messaging_app
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     volumes:
