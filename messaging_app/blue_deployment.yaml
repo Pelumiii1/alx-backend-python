@@ -3,10 +3,16 @@ kind: Deployment
 metadata:
   name: django-blue-deployment
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: django
       version: blue
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -14,27 +20,7 @@ spec:
         version: blue
     spec:
       containers:
-        - name: django-messaging
-          image: messaging-app:latest
+        - name: django-container
+          image: your-dockerhub-username/messaging-app:2.0
           ports:
             - containerPort: 8000
-          env:
-            - name: DJANGO_SETTINGS_MODULE
-              value: messaging_app.settings
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: django-secret
-                  key: secret_key
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: django-messaging-service
-spec:
-  type: ClusterIP
-  selector:
-    app: django-messaging
-  ports:
-    - port: 8000
-      targetPort: 8000
