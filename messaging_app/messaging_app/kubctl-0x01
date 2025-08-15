@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "=== Scaling Django App to 3 replicas ==="
+kubectl scale deployment django-messaging-deployment --replicas=3
+
+echo "=== Waiting for pods to be ready ==="
+sleep 10
+kubectl get pods
+
+echo "=== Running load test with wrk ==="
+# Change the URL to your app’s endpoint
+wrk -t4 -c100 -d30s http://localhost:8000/
+
+echo "=== Checking resource usage ==="
+kubectl top pods
