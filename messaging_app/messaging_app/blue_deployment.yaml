@@ -1,18 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django-messaging-deployment
-  labels:
-    app: django-messaging
+  name: django-blue-deployment
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: django-messaging
+      app: django
+      version: blue
   template:
     metadata:
       labels:
-        app: django-messaging
+        app: django
+        version: blue
     spec:
       containers:
         - name: django-messaging
