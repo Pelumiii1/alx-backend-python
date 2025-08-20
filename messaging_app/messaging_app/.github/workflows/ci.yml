@@ -1,10 +1,10 @@
-name: Django CI
+name: Django CI with Code Quality Checks
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -22,19 +22,33 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'
-    - name: Install Dependencies
-      run: pip install -r requirements.txt
-    - name: Run Tests
-      env:
-        DB_HOST: 127.0.0.1
-        DB_NAME: test_db
-        DB_USER: test_user
-        DB_PASSWORD: test_password
-        DB_PORT: 3306
-      run: |
-        python manage.py test
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install flake8 coverage
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with coverage
+        env:
+          DB_HOST: 127.0.0.1
+          DB_NAME: test_db
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          DB_PORT: 3306
+        run: |
+          coverage run manage.py test
+          coverage xml -o coverage.xml
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
