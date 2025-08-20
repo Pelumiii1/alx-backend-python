@@ -28,7 +28,7 @@ pipeline {
             $class: 'GitSCM',
             branches: [[name: "*/${env.GIT_BRANCH}"]],
             userRemoteConfigs: [[
-              url: 'https://github.com/Pelumiii1/alx-backend-python/tree/main/messaging_app',
+              url: 'https://github.com/Pelumiii1/alx-backend-python.git',
               credentialsId: 'github-creds'
             ]]
           ])
