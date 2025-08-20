@@ -1,85 +1,30 @@
 pipeline {
-  agent {
-    docker {
-      image 'python:3.11-slim'
-      // run as root so we can apt-get if needed
-      args '-u root:root'
-    }
-  }
+    agent any
 
-  options {
-    timestamps()
-    ansiColor('xterm')
-  }
-
-  environment {
-    // adjust if your default branch is not main
-    GIT_BRANCH = 'main'
-    // optional: set PYTHONUNBUFFERED for clearer logs
-    PYTHONUNBUFFERED = '1'
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        // clone the whole repo; Jenkinsfile is under messaging_app/
-        dir("${env.WORKSPACE}") {
-          checkout([
-            $class: 'GitSCM',
-            branches: [[name: "*/${env.GIT_BRANCH}"]],
-            userRemoteConfigs: [[
-              url: 'https://github.com/Pelumiii1/alx-backend-python.git',
-              credentialsId: 'github-creds'
-            ]]
-          ])
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Pelumiii1/alx-backend-python.git',
+                    credentialsId: 'github-creds'
+            }
         }
-      }
-    }
 
-    stage('Set up Python & deps') {
-      steps {
-        dir('messaging_app') {
-          sh '''
-            python --version
-            pip install --upgrade pip
-            # install test deps; ensure pytest is in requirements.txt OR install explicitly
-            if [ -f requirements.txt ]; then
-              pip install -r requirements.txt
-            fi
-            pip install pytest pytest-cov pytest-html || true
-          '''
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip3 install -r messaging_app/requirements.txt'
+            }
         }
-      }
-    }
 
-    stage('Run tests') {
-      steps {
-        dir('messaging_app') {
-          sh '''
-            mkdir -p reports
-            # junit xml for Jenkins + optional HTML report
-            pytest -q --junitxml=reports/junit.xml --html=reports/report.html --self-contained-html || EXIT=$?
-            # ensure non-zero exit still publishes reports in post block
-            exit ${EXIT:-0}
-          '''
+        stage('Run Tests') {
+            steps {
+                sh 'pytest messaging_app/tests --maxfail=1 --disable-warnings -q --junitxml=report.xml'
+            }
+            post {
+                always {
+                    junit 'report.xml'
+                }
+            }
         }
-      }
     }
-  }
-
-  post {
-    always {
-      // publish JUnit results (even if tests failed)
-      junit testResults: 'messaging_app/reports/junit.xml', allowEmptyResults: true
-
-      // archive the HTML report for download
-      archiveArtifacts artifacts: 'messaging_app/reports/**', allowEmptyArchive: true
-    }
-    failure {
-      echo '❌ Tests failed. Check JUnit results and HTML report under artifacts.'
-    }
-    success {
-      echo '✅ Tests passed.'
-    }
-  }
 }
