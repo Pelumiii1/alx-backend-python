@@ -11,4 +11,4 @@ psycopg
 drf-yasg
 drf-yasg
 celery
-librabbitmq
+librabbitmq==2.0.0
