@@ -10,3 +10,5 @@ mysqlclient
 psycopg
 drf-yasg
 drf-yasg
+celery
+librabbitmq

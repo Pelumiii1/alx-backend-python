@@ -1,3 +1,4 @@
+from .tasks import send_email_notification
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import viewsets, filters, generics, permissions, status
@@ -46,7 +47,15 @@ class MessageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         conversation_pk = self.kwargs['conversation_pk']
         conversation = Conversation.objects.get(pk=conversation_pk)
-        serializer.save(sender=self.request.user, conversation=conversation)
+        message = serializer.save(sender=self.request.user, conversation=conversation)
+
+        # Get the recipient to send the email to
+        recipient = conversation.participants.exclude(pk=self.request.user.pk).first()
+
+        if recipient:
+            subject = f"New message from {self.request.user.username}"
+            message_body = f'You have a new message in your conversation: "{conversation.id}".\n\nMessage: {message.message_body}'
+            send_email_notification.delay(recipient.email, subject, message_body)
 
 
 class RegisterViewSet(generics.CreateAPIView):
